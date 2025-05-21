@@ -1,0 +1,6 @@
+command for FAST API:
+
+uvicorn main:app --reload
+
+
+Frontend Command

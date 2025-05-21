@@ -1,0 +1,13 @@
+# Virtualenvs
+venv
+Pipfile
+Pipfile.lock
+virtualenv_name
+
+
+*.log
+
+*.py[codt]
+
+# C extensions
+*.so
