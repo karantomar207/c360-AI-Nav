@@ -3,41 +3,73 @@ import faiss
 import pickle
 import os
 from sentence_transformers import SentenceTransformer
+import numpy as np
 
-# Ensure the embeddings directory exists
-os.makedirs('embeddings', exist_ok=True)
+# Set up directories
+DATA_DIR = "data"
+EMBEDDINGS_DIR = "embeddings"
+os.makedirs(DATA_DIR, exist_ok=True)
+os.makedirs(EMBEDDINGS_DIR, exist_ok=True)
 
-# Load the CSV file
-print("Loading data from CSV...")
-df = pd.read_csv('data/dummy_data.csv')
-print(f"Loaded {len(df)} entries from CSV.")
-
-# Initialize the sentence transformer model
+# Initialize SentenceTransformer model
 print("Loading SentenceTransformer model...")
 model = SentenceTransformer('all-MiniLM-L6-v2')
 
-# Generate embeddings for the skills
-print("Generating embeddings for skills...")
-texts = df['skill'].tolist()
-embeddings = model.encode(texts, show_progress_bar=True)
-print(f"Generated {len(embeddings)} embeddings.")
+# Function to generate and save FAISS index
+def create_and_save_embeddings(data, prefix):
+    print(f"\nGenerating embeddings for {prefix} data...")
 
-# Create and save the FAISS index
-print("Creating FAISS index...")
-dimension = embeddings.shape[1]
-index = faiss.IndexFlatL2(dimension)
-index.add(embeddings)
-print(f"Added {index.ntotal} vectors to the index.")
+    # Use all columns to form a single string per row
+    texts = data.apply(lambda row: ' '.join(map(str, row.values)), axis=1).tolist()
 
-# Save the FAISS index
-print("Saving FAISS index...")
-faiss.write_index(index, 'embeddings/faiss_index.bin')
+    # Generate embeddings
+    embeddings = model.encode(texts, show_progress_bar=True)
+    embeddings = np.array(embeddings).astype('float32')
 
-# Save the metadata
-print("Saving metadata...")
-with open('embeddings/meta.pkl', 'wb') as f:
-    pickle.dump(df.to_dict(orient='records'), f)
+    # Create and save FAISS index
+    dimension = embeddings.shape[1]
+    index = faiss.IndexFlatL2(dimension)
+    index.add(embeddings)
 
-print("Embedding generation completed successfully!")
-print(f"Index saved to: embeddings/faiss_index.bin")
-print(f"Metadata saved to: embeddings/meta.pkl")
+    faiss_path = f"{EMBEDDINGS_DIR}/{prefix}_faiss_index.bin"
+    meta_path = f"{EMBEDDINGS_DIR}/{prefix}_meta.pkl"
+
+    faiss.write_index(index, faiss_path)
+
+    with open(meta_path, 'wb') as f:
+        pickle.dump(data.to_dict(orient='records'), f)
+
+    print(f"FAISS index saved to: {faiss_path}")
+    print(f"Metadata saved to: {meta_path}")
+
+def main():
+    # Load full dataset
+    print("Loading career data...")
+    all_data = pd.read_csv(f"{DATA_DIR}/careers_data.csv")
+
+    # Classify for students vs professionals
+    print("Classifying entries...")
+    def classify(row):
+        keywords = ['senior', 'lead', 'manager', 'expert', 'experienced', 'advanced', 'principal']
+        text = ' '.join(map(str, row.values)).lower()
+        if any(kw in text for kw in keywords):
+            return False
+        return True
+
+    all_data['for_students'] = all_data.apply(classify, axis=1)
+
+    # Split datasets
+    student_data = all_data[all_data['for_students']].copy()
+    professional_data = all_data[~all_data['for_students']].copy()
+
+    student_data.to_csv(f"{DATA_DIR}/student_data.csv", index=False)
+    professional_data.to_csv(f"{DATA_DIR}/professional_data.csv", index=False)
+
+    # Create and save embeddings
+    create_and_save_embeddings(student_data, "student")
+    create_and_save_embeddings(professional_data, "professional")
+
+    print("\nEmbedding generation completed successfully!")
+
+if __name__ == "__main__":
+    main()

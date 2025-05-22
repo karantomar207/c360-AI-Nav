@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Query
 from fastapi.middleware.cors import CORSMiddleware
 from scripts.query_embeddings import search
 
@@ -12,7 +12,7 @@ app.add_middleware(
 )
 
 @app.get("/search")
-def search_route(query: str):
-    # The search function now returns the properly formatted data structure
-    results = search(query)
-    return results  # No need to wrap in {"results": results} as the structure is already correct
+async def search_route(query: str = Query(...), mode: str = Query("student")):
+    # Call the search function from query_embeddings.py
+    results = search(query, mode)
+    return results

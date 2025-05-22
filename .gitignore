@@ -3,6 +3,8 @@ venv
 Pipfile
 Pipfile.lock
 virtualenv_name
+embeddings
+data
 
 
 *.log

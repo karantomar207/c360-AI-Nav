@@ -542,7 +542,7 @@
       resultsContainer.innerHTML = "";
       
       try {
-        const response = await fetch(`http://localhost:8000/search?query=${encodeURIComponent(userInput)}`);
+        const response = await fetch(`http://localhost:8000/search/all?query=${encodeURIComponent(userInput)}`);
         
         if (!response.ok) {
           throw new Error("Server error or invalid response.");
