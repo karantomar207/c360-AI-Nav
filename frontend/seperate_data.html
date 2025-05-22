@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Career Navigator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <h2>Career Navigator</h2>
+      <p>AI-Powered Career Guidance</p>
+    </div>
+    
+    <div class="nav-links">
+      <div class="nav-item active" data-page="explore">
+        <i class="fas fa-search"></i>
+        <span>Explore Careers</span>
+      </div>
+      <div class="nav-item" data-page="history">
+        <i class="fas fa-history"></i>
+        <span>Search History</span>
+      </div>
+      <div class="nav-item" data-page="about">
+        <i class="fas fa-info-circle"></i>
+        <span>About</span>
+      </div>
+    </div>
+    
+    <div class="sidebar-footer">
+      <p>AI Career Navigator v1.0</p>
+      <p>© 2025 AI Career Solutions</p>
+    </div>
+  </div>
+  
+  <div class="main">
+    <!-- Explore Page -->
+    <div class="page active" id="explorePage">
+      <div class="header">
+        <h1>AI Career Navigator</h1>
+        <p>Enter a skill or interest to discover relevant career paths, certifications, learning resources, and more.</p>
+      </div>
+      
+      <div class="user-mode-selector">
+        <h2>I am a:</h2>
+        <div class="mode-options">
+          <div class="mode-option active" data-mode="student">
+            <i class="fas fa-graduation-cap"></i>
+            <span>Student</span>
+            <p>Find entry-level opportunities and learning resources</p>
+          </div>
+          <div class="mode-option" data-mode="professional">
+            <i class="fas fa-briefcase"></i>
+            <span>Professional</span>
+            <p>Discover advanced career paths and upskilling options</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="search-container">
+        <h2>Find Your Career Path</h2>
+        <div class="search-box">
+          <input type="text" id="userInput" placeholder="e.g., Python, Marketing, Data Analysis" />
+          <button onclick="fetchData()" id="searchButton">
+            <i class="fas fa-search"></i> Search
+          </button>
+          <button onclick="clearResults()" id="clearButton" class="clear-button">
+            <i class="fas fa-times"></i> Clear
+          </button>
+        </div>
+        <div class="trending-keywords">
+          <div class="keyword" onclick="setKeyword('Python')">Python</div>
+          <div class="keyword" onclick="setKeyword('Data Analysis')">Data Analysis</div>
+          <div class="keyword" onclick="setKeyword('Digital Marketing')">Digital Marketing</div>
+          <div class="keyword" onclick="setKeyword('UX Design')">UX Design</div>
+          <div class="keyword" onclick="setKeyword('Machine Learning')">Machine Learning</div>
+        </div>
+      </div>
+      
+      <div class="loader" id="loader" style="display:none;">
+        <i class="fas fa-circle-notch"></i> Finding career opportunities...
+      </div>
+      
+      <div class="error" id="errorMsg" style="display:none;"></div>
+      
+      <div id="resultsSection" style="display:none;">
+        <div class="results-header">
+          <h2>Career Recommendations for "<span id="queryDisplay"></span>"</h2>
+          <span class="mode-indicator" id="modeIndicator">Student Mode</span>
+        </div>
+        
+        <div class="results-container" id="resultsContainer">
+          <!-- Results will be displayed here -->
+        </div>
+      </div>
+      
+      <div class="no-results" id="noResults" style="display:none;">
+        <i class="fas fa-search"></i>
+        <h2>No results found</h2>
+        <p>Try a different search term or browse our trending keywords.</p>
+      </div>
+    </div>
+    
+    <!-- History Page -->
+    <div class="page" id="historyPage">
+      <div class="header">
+        <h1>Search History</h1>
+        <p>View and manage your recent searches.</p>
+      </div>
+      
+      <div class="history-container">
+        <ul class="history-list" id="searchHistory">
+          <!-- Search history will be displayed here -->
+        </ul>
+        
+        <button onclick="clearAllHistory()" class="clear-all-button">
+          <i class="fas fa-trash"></i> Clear All History
+        </button>
+      </div>
+    </div>
+    
+    <!-- About Page -->
+    <div class="page" id="aboutPage">
+      <div class="header">
+        <h1>About AI Career Navigator</h1>
+        <p>Your AI-powered guide to career exploration and development.</p>
+      </div>
+      
+      <div class="about-content">
+        <div class="about-section">
+          <h2>Our Mission</h2>
+          <p>AI Career Navigator is designed to help students and professionals discover relevant career paths, certifications, and resources based on their skills and interests. We use machine learning algorithms to provide personalized recommendations tailored to your experience level.</p>
+        </div>
+        
+        <div class="about-section">
+          <h2>How It Works</h2>
+          <p>Simply select your experience level (Student or Professional), enter a skill or interest, and our AI will generate recommendations specifically tailored to your needs. Students receive entry-level opportunities and educational resources, while professionals get advanced career paths and upskilling options.</p>
+        </div>
+        
+        <div class="about-section">
+          <h2>Contact Us</h2>
+          <p>For any questions or feedback, please contact us at support@aicareernavigator.com</p>
+        </div>
+      </div>
+    </div>
+    
+    <footer>
+      <p>Powered by AI Career Navigator - Finding your perfect career path.</p>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

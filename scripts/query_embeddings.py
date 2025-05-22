@@ -1,65 +1,42 @@
+import os
 import faiss
 import pickle
+import numpy as np
 from sentence_transformers import SentenceTransformer
 
+# Path to data files and embeddings
+student_index = faiss.read_index('embeddings/student_faiss_index.bin')
+with open('embeddings/student_meta.pkl', 'rb') as f:
+    student_meta = pickle.load(f)
+
+professional_index = faiss.read_index('embeddings/professional_faiss_index.bin')
+with open('embeddings/professional_meta.pkl', 'rb') as f:
+    professional_meta = pickle.load(f)
+
 model = SentenceTransformer('all-MiniLM-L6-v2')
-index = faiss.read_index('embeddings/faiss_index.bin')
 
-with open('embeddings/meta.pkl', 'rb') as f:
-    meta_data = pickle.load(f)
 
-def search(prompt, top_k=3):
-    embedding = model.encode([prompt])
+def search(prompt, mode='student', top_k=5):
+
+    # Get query embedding
+    embedding = model.encode([prompt], convert_to_numpy=True)
+
+    # Select appropriate index and meta_data
+    if mode == 'professional':
+        index = professional_index
+        meta_data = professional_meta
+    else:
+        index = student_index
+        meta_data = student_meta
+
+    # Perform search
     D, I = index.search(embedding, top_k)
-    
-    # Get the top results
-    results = [meta_data[i] for i in I[0]]
-    
-    # Format the response to match the frontend's expected structure
-    if results:
-        # Initialize response with empty lists for each category
-        response = {
-            "jobs": [],
-            "certifications": [],
-            "youtube_channels": [],
-            "ebooks": [],
-            "websites": []
-        }
-        
-        # Populate the response from the results
-        for result in results:
-            # Extract jobs (comma-separated string to list)
-            if "jobs" in result:
-                jobs = [job.strip() for job in result["jobs"].split(",")]
-                response["jobs"].extend(jobs)
-            
-            # Extract certifications (comma-separated string to list)
-            if "certifications" in result:
-                certifications = [cert.strip() for cert in result["certifications"].split(",")]
-                response["certifications"].extend(certifications)
-            
-            # Extract YouTube channels (comma-separated string to list)
-            if "youtube_channels" in result:
-                channels = [channel.strip() for channel in result["youtube_channels"].split(",")]
-                response["youtube_channels"].extend(channels)
-            
-            # Extract ebooks (comma-separated string to list)
-            if "ebooks" in result:
-                books = [book.strip() for book in result["ebooks"].split(",")]
-                response["ebooks"].extend(books)
-            
-            # Extract websites (comma-separated string to list)
-            if "websites" in result:
-                sites = [site.strip() for site in result["websites"].split(",")]
-                response["websites"].extend(sites)
-        
-        # Remove duplicates and return only the top 5 items per category
-        for key in response:
-            response[key] = list(dict.fromkeys(response[key]))[:5]
-        
-        return response
-    
-    return {
+    results = [meta_data[i] for i in I[0] if i < len(meta_data)]
+
+    print("resultsresultsresults", results)
+
+    # Initialize structured response
+    response = {
         "jobs": [],
         "certifications": [],
         "youtube_channels": [],
@@ -67,10 +44,43 @@ def search(prompt, top_k=3):
         "websites": []
     }
 
+    # Extract and split fields properly
+    for item in results:
+        if 'jobs' in item:
+            jobs = [j.strip() for j in item['jobs'].split(',')]
+            response['jobs'].extend(jobs)
+
+        if 'certifications' in item:
+            certs = [c.strip() for c in item['certifications'].split(',')]
+            response['certifications'].extend(certs)
+
+        if 'youtube_channels' in item:
+            channels = [y.strip() for y in item['youtube_channels'].split(',')]
+            response['youtube_channels'].extend(channels)
+
+        if 'ebooks' in item:
+            books = [b.strip() for b in item['ebooks'].split(',')]
+            response['ebooks'].extend(books)
+
+        if 'websites' in item:
+            sites = [s.strip() for s in item['websites'].split(',')]
+            response['websites'].extend(sites)
+
+    # Deduplicate and return only top 5
+    for key in response:
+        response[key] = list(dict.fromkeys(response[key]))[:5]
+
+    print("response", response)
+    return response
+
+
+
 if __name__ == "__main__":
     prompt = input("Enter a skill or interest: ")
-    results = search(prompt)
-    print("Top job recommendations:", results["jobs"])
+    user_type = input("Enter mode (student/professional): ").strip().lower()
+    results = search(prompt, mode=user_type)
+    
+    print("\nTop job recommendations:", results["jobs"])
     print("Recommended certifications:", results["certifications"])
     print("YouTube channels to follow:", results["youtube_channels"])
     print("Recommended ebooks:", results["ebooks"])
