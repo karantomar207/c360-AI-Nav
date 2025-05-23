@@ -2,74 +2,117 @@ import pandas as pd
 import faiss
 import pickle
 import os
-from sentence_transformers import SentenceTransformer
 import numpy as np
+from sentence_transformers import SentenceTransformer
+from tqdm import tqdm
 
-# Set up directories
+# Setup directories
 DATA_DIR = "data"
 EMBEDDINGS_DIR = "embeddings"
 os.makedirs(DATA_DIR, exist_ok=True)
 os.makedirs(EMBEDDINGS_DIR, exist_ok=True)
 
-# Initialize SentenceTransformer model
-print("Loading SentenceTransformer model...")
-model = SentenceTransformer('all-MiniLM-L6-v2')
+# Load high-quality embedding model
+print("Loading BGE Base embedding model...")
+model = SentenceTransformer('BAAI/bge-base-en-v1.5')  # High-accuracy 768-dim model
 
-# Function to generate and save FAISS index
-def create_and_save_embeddings(data, prefix):
-    print(f"\nGenerating embeddings for {prefix} data...")
+# Classification keywords
+PROFESSIONAL_KWS = ['senior', 'lead', 'manager', 'expert', 'experienced', 'advanced', 
+                    'principal', 'director', 'head', 'chief', 'architect', '5+ years',
+                    'masters required', 'phd required', 'management', 'leadership',
+                    'strategic', 'enterprise', 'executive']
 
-    # Use all columns to form a single string per row
+STUDENT_KWS = ['entry', 'junior', 'trainee', 'intern', 'fresher', 'beginner',
+               'basic', 'introduction', 'fundamentals', 'starter', 'new grad',
+               'graduate', 'bachelor', 'student', 'learn', 'course']
+
+def classify_student(row):
+    text = ' '.join(map(str, row.values)).lower()
+    pro = sum(1 for k in PROFESSIONAL_KWS if k in text)
+    stu = sum(1 for k in STUDENT_KWS if k in text)
+    return stu >= pro
+
+def create_faiss_index(data, prefix):
+    print(f"\nCreating embeddings for: {prefix}")
     texts = data.apply(lambda row: ' '.join(map(str, row.values)), axis=1).tolist()
-
-    # Generate embeddings
-    embeddings = model.encode(texts, show_progress_bar=True)
+    embeddings = model.encode(texts, show_progress_bar=True, batch_size=64)
     embeddings = np.array(embeddings).astype('float32')
 
-    # Create and save FAISS index
-    dimension = embeddings.shape[1]
-    index = faiss.IndexFlatL2(dimension)
+    # Sanity check for dimensions
+    dim = embeddings.shape[1]
+    print(f"Embedding dimension: {dim}")
+
+    index = faiss.IndexFlatL2(dim)
     index.add(embeddings)
 
     faiss_path = f"{EMBEDDINGS_DIR}/{prefix}_faiss_index.bin"
     meta_path = f"{EMBEDDINGS_DIR}/{prefix}_meta.pkl"
 
     faiss.write_index(index, faiss_path)
-
     with open(meta_path, 'wb') as f:
         pickle.dump(data.to_dict(orient='records'), f)
 
-    print(f"FAISS index saved to: {faiss_path}")
-    print(f"Metadata saved to: {meta_path}")
+    print(f"Saved {prefix} index and metadata.")
+
+def generate_suggestions(df):
+    print("\nGenerating suggestions from careers_data.csv...")
+    suggestions = []
+    for _, row in tqdm(df.iterrows(), total=len(df)):
+        row_text = ' '.join(map(str, row.values)).lower()
+
+        base_skill = next((kw for kw in STUDENT_KWS + PROFESSIONAL_KWS if kw in row_text), "general")
+        additional_skills = ', '.join([kw for kw in row_text.split() if kw not in base_skill])[:100]
+        career_path = row.get("role", "Unknown Role")
+        timeline = "6-12 months" if classify_student(row) else "1-2 years"
+        description = row.get("description", "")[:200]
+        field = row.get("field", "Technology")
+        level = "student" if classify_student(row) else "professional"
+
+        suggestions.append({
+            "base_skill": base_skill,
+            "additional_skills": additional_skills,
+            "career_path": career_path,
+            "timeline": timeline,
+            "description": description,
+            "field": field,
+            "experience_level": level
+        })
+
+    suggestions_df = pd.DataFrame(suggestions)
+    suggestions_df.to_csv(f"{DATA_DIR}/career_suggestions.csv", index=False)
+    print(f"Saved career suggestions to career_suggestions.csv")
+    return suggestions_df
 
 def main():
-    # Load full dataset
-    print("Loading career data...")
-    all_data = pd.read_csv(f"{DATA_DIR}/careers_data.csv")
+    careers_path = f"{DATA_DIR}/careers_data.csv"
+    if not os.path.exists(careers_path):
+        print(f"Error: {careers_path} not found!")
+        return
 
-    # Classify for students vs professionals
-    print("Classifying entries...")
-    def classify(row):
-        keywords = ['senior', 'lead', 'manager', 'expert', 'experienced', 'advanced', 'principal']
-        text = ' '.join(map(str, row.values)).lower()
-        if any(kw in text for kw in keywords):
-            return False
-        return True
+    df = pd.read_csv(careers_path)
+    print(f"Loaded {len(df)} rows from careers_data.csv")
 
-    all_data['for_students'] = all_data.apply(classify, axis=1)
+    # Classify data
+    df['for_students'] = df.apply(classify_student, axis=1)
+    student_df = df[df['for_students']].drop(columns=['for_students'])
+    professional_df = df[~df['for_students']].drop(columns=['for_students'])
 
-    # Split datasets
-    student_data = all_data[all_data['for_students']].copy()
-    professional_data = all_data[~all_data['for_students']].copy()
+    student_df.to_csv(f"{DATA_DIR}/student_data.csv", index=False)
+    professional_df.to_csv(f"{DATA_DIR}/professional_data.csv", index=False)
+    print("Saved student and professional data.")
 
-    student_data.to_csv(f"{DATA_DIR}/student_data.csv", index=False)
-    professional_data.to_csv(f"{DATA_DIR}/professional_data.csv", index=False)
+    # Create embeddings
+    if not student_df.empty:
+        create_faiss_index(student_df, "student")
+    if not professional_df.empty:
+        create_faiss_index(professional_df, "professional")
 
-    # Create and save embeddings
-    create_and_save_embeddings(student_data, "student")
-    create_and_save_embeddings(professional_data, "professional")
+    # Generate and embed suggestions
+    suggestions_df = generate_suggestions(df)
+    if not suggestions_df.empty:
+        create_faiss_index(suggestions_df, "suggestions")
 
-    print("\nEmbedding generation completed successfully!")
+    print("\nAll embeddings and suggestions generated successfully.")
 
 if __name__ == "__main__":
     main()
