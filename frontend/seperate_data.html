@@ -64,7 +64,7 @@
         <h2>Find Your Career Path</h2>
         <div class="search-box">
           <input type="text" id="userInput" placeholder="e.g., Python, Marketing, Data Analysis" />
-          <button onclick="fetchData()" id="searchButton">
+          <button onclick="fetchDataFromAPI()" id="searchButton">
             <i class="fas fa-search"></i> Search
           </button>
           <button onclick="clearResults()" id="clearButton" class="clear-button">
@@ -72,11 +72,11 @@
           </button>
         </div>
         <div class="trending-keywords">
-          <div class="keyword" onclick="setKeyword('Python')">Python</div>
-          <div class="keyword" onclick="setKeyword('Data Analysis')">Data Analysis</div>
-          <div class="keyword" onclick="setKeyword('Digital Marketing')">Digital Marketing</div>
-          <div class="keyword" onclick="setKeyword('UX Design')">UX Design</div>
-          <div class="keyword" onclick="setKeyword('Machine Learning')">Machine Learning</div>
+          <div class="keyword" onclick="setKeywordWithMode('Python')">Python</div>
+          <div class="keyword" onclick="setKeywordWithMode('Data Analysis')">Data Analysis</div>
+          <div class="keyword" onclick="setKeywordWithMode('Digital Marketing')">Digital Marketing</div>
+          <div class="keyword" onclick="setKeywordWithMode('UX Design')">UX Design</div>
+          <div class="keyword" onclick="setKeywordWithMode('Machine Learning')">Machine Learning</div>
         </div>
       </div>
       
@@ -93,7 +93,7 @@
         </div>
         
         <div class="results-container" id="resultsContainer">
-          <!-- Results will be displayed here -->
+          <!-- Results will be displayed here in horizontal format -->
         </div>
       </div>
       
