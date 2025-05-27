@@ -13,26 +13,26 @@ professional_index = faiss.read_index('embeddings/professional_faiss_index.bin')
 with open('embeddings/professional_meta.pkl', 'rb') as f:
     professional_meta = pickle.load(f)
 
-model = SentenceTransformer('BAAI/bge-base-en-v1.5')  # High-accuracy 768-dim model
+model = SentenceTransformer('all-MiniLM-L6-v2')  # High-accuracy 768-dim model
 
 def search(prompt, mode='student', top_k=5):
 
     # Get query embedding
     embedding = model.encode([prompt], convert_to_numpy=True)
 
-    # # Select appropriate index and meta_data
-    # if mode == 'professional':
-    #     index = professional_index
-    #     meta_data = professional_meta
-    # else:
-    #     index = student_index
-    #     meta_data = student_meta
+    # Select appropriate index and meta_data
+    if mode == 'professional':
+        index = professional_index
+        meta_data = professional_meta
+    else:
+        index = student_index
+        meta_data = student_meta
 
-    # # Perform search
-    # D, I = index.search(embedding, top_k)
-    # results = [meta_data[i] for i in I[0] if i < len(meta_data)]
+    # Perform search
+    D, I = index.search(embedding, top_k)
+    results = [meta_data[i] for i in I[0] if i < len(meta_data)]
 
-    # print("resultsresultsresults", results)
+    print("resultsresultsresults", results)
 
     
     # Select index and meta
