@@ -314,11 +314,6 @@ button:disabled {
   background-color: var(--professional-color);
 }
 
-.results-container {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
-}
 
 .result-card {
   background: white;
@@ -515,5 +510,58 @@ footer {
   
   .main {
     padding: 20px;
+  }
+}
+
+
+
+.result-card ul {
+  padding-left: 20px;
+  margin-bottom: 15px;
+  list-style: disc;
+}
+
+.result-card li {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #374151;
+}
+
+.result-card hr {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 10px 0;
+}
+
+
+.results-row {
+  display: flex;
+  overflow-x: auto;
+  gap: 20px;
+  scroll-behavior: smooth;
+  padding: 10px 0;
+}
+
+.result-card {
+  flex: 0 0 auto;
+  min-width: 300px;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeSlideIn 0.9s forwards;
+  margin: 20px 0px;
+}
+
+.result-card:nth-child(1) { animation-delay: 0s; }
+.result-card:nth-child(2) { animation-delay: 0.1s; }
+.result-card:nth-child(3) { animation-delay: 0.2s; }
+.result-card:nth-child(4) { animation-delay: 0.3s; }
+.result-card:nth-child(5) { animation-delay: 0.4s; }
+.result-card:nth-child(6) { animation-delay: 0.5s; }
+/* Add more if needed */
+
+@keyframes fadeSlideIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
