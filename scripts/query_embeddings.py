@@ -5,12 +5,12 @@ import numpy as np
 from sentence_transformers import SentenceTransformer
 
 # Path to data files and embeddings
-student_index = faiss.read_index('embeddings/student_faiss_index.bin')
-with open('embeddings/student_meta.pkl', 'rb') as f:
+student_index = faiss.read_index('static/embeddings/student_faiss_index.bin')
+with open('static/embeddings/student_meta.pkl', 'rb') as f:
     student_meta = pickle.load(f)
 
-professional_index = faiss.read_index('embeddings/professional_faiss_index.bin')
-with open('embeddings/professional_meta.pkl', 'rb') as f:
+professional_index = faiss.read_index('static/embeddings/professional_faiss_index.bin')
+with open('static/embeddings/professional_meta.pkl', 'rb') as f:
     professional_meta = pickle.load(f)
 
 model = SentenceTransformer('all-MiniLM-L6-v2')

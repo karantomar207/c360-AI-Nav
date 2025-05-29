@@ -3,3 +3,6 @@ faiss-cpu
 sentence-transformers
 fastapi
 uvicorn
+numpy
+boto3 
+python-dotenv

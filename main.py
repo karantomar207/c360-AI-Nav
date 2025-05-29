@@ -12,7 +12,7 @@ app.add_middleware(
 )
 
 @app.get("/search")
-async def search_route(query: str = Query(...), mode: str = Query("student")):
+async def search_route(prompt: str = Query(...), mode: str = Query("student")):
     # Call the search function from query_embeddings.py
-    results = search(query, mode)
+    results = search(prompt, mode)
     return results
