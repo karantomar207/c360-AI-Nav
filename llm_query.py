@@ -296,6 +296,70 @@ def balanced_search(prompt_embedding, mode, total_results=TOP_K):
     logger.info(f"Result distribution: {result_distribution}")
     return all_results
 
+import tiktoken  # Or use the appropriate tokenizer if Groq has their own
+
+GROQ_MODEL_NAME = "llama3-70b-8192"
+MODEL_TOKEN_LIMIT = 8192
+
+def count_tokens(text, model=GROQ_MODEL_NAME):
+    tokenizer = tiktoken.get_encoding("cl100k_base")
+    return len(tokenizer.encode(text))
+
+def generate_completion(groq_client, system_prompt, user_message, stream=False, temperature=0.3):
+    # Token budget calculation
+    input_tokens = count_tokens(system_prompt) + count_tokens(user_message)
+    buffer_tokens = 50  # buffer for safety margin
+    max_allowed_output = MODEL_TOKEN_LIMIT - input_tokens - buffer_tokens
+    max_tokens = min(3000, max_allowed_output)
+
+    if max_tokens <= 0:
+        raise ValueError("❌ Input too long — reduce prompt length or context.")
+
+    print(f"🧮 Input tokens: {input_tokens} | Max output tokens: {max_tokens} | Streaming: {stream}")
+
+    # Prepare messages
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": user_message}
+    ]
+
+    if stream:
+        stream_resp = groq_client.chat.completions.create(
+            model=GROQ_MODEL_NAME,
+            messages=messages,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            top_p=1,
+            stream=True
+        )
+
+        print("📡 Streaming response:")
+        full_response = ""
+        for chunk in stream_resp:
+            delta = chunk.choices[0].delta.content or ""
+            print(delta, end="", flush=True)
+            full_response += delta
+
+        print("\n✅ Done streaming.")
+        return full_response
+
+    else:
+        completion = groq_client.chat.completions.create(
+            model=GROQ_MODEL_NAME,
+            messages=messages,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            top_p=1,
+            stream=False
+        )
+
+        output_text = completion.choices[0].message.content
+        finish_reason = completion.choices[0].finish_reason
+
+        print(f"📏 Finish Reason: {finish_reason} | Output length: {len(output_text.split())} words")
+        return output_text
+
+
 def get_dataset_prompt_template(dataset_name: str) -> Dict[str, str]:
     """Get system and user prompt templates for each dataset type"""
     templates = {
@@ -440,16 +504,23 @@ async def enhance_dataset_batch(dataset_name: str, items: List[Dict], query: str
         )
         
         # Make single LLM call for all items in this dataset
-        completion = groq_client.chat.completions.create(
-            model="llama3-70b-8192",
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_message}
-            ],
-            temperature=0.3,
-            max_tokens=3000,  # Increased for batch processing
-            top_p=1,
-            stream=False
+        # completion = groq_client.chat.completions.create(
+        #     model="llama3-70b-8192",
+        #     messages=[
+        #         {"role": "system", "content": system_prompt},
+        #         {"role": "user", "content": user_message}
+        #     ],
+        #     temperature=0.3,
+        #     max_tokens=3000,  # Increased for batch processing
+        #     top_p=1,
+        #     stream=False
+        # )
+
+        completion = generate_completion(
+            groq_client=groq_client,
+            system_prompt=system_prompt,
+            user_message=user_message,
+            stream=True
         )
         
         # Parse the enhanced content
