@@ -40,8 +40,11 @@
     <!-- Explore Page -->
     <div class="page active" id="explorePage">
       <div class="header">
-        <h1>AI Career Navigator</h1>
-        <p>Enter a skill or interest to discover relevant career paths, certifications, learning resources, and more.</p>
+        <div class="header_inner">
+          <h1>AI Career Navigator</h1>
+          <p>Enter a skill or interest to discover relevant career paths, certifications, learning resources, and more.</p>
+        </div>
+        <button class="logout-btn" id="logoutBtn">Logout</button>
       </div>
       
       <div class="user-mode-selector">
@@ -151,7 +154,19 @@
       <p>Powered by AI Career Navigator - Finding your perfect career path.</p>
     </footer>
   </div>
-
+  <script>
+      document.getElementById('logoutBtn').addEventListener('click', function() {
+          window.location.href = 'login.html';
+      });
+      
+      // Add Font Awesome for icons
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css';
+      document.head.appendChild(link);
+  </script>
   <script src="script.js"></script>
+
+
 </body>
 </html>
