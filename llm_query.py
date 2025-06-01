@@ -291,7 +291,7 @@ def count_tokens(text, model=GROQ_MODEL_NAME):
     tokenizer = tiktoken.get_encoding("cl100k_base")
     return len(tokenizer.encode(text))
 
-def generate_completion(groq_client, system_prompt, user_message, stream=False, temperature=0.3):
+def generate_completion(groq_client, system_prompt, user_message, stream=True, temperature=0.3):
     # Token budget calculation
     input_tokens = count_tokens(system_prompt) + count_tokens(user_message)
     buffer_tokens = 50  # buffer for safety margin
@@ -323,7 +323,6 @@ def generate_completion(groq_client, system_prompt, user_message, stream=False, 
         full_response = ""
         for chunk in stream_resp:
             delta = chunk.choices[0].delta.content or ""
-            print(delta, end="", flush=True)
             full_response += delta
 
         print("\n✅ Done streaming.")
