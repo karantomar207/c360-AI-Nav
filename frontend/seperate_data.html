@@ -6,7 +6,7 @@
   <title>AI Career Navigator</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
   <div class="sidebar">
@@ -40,8 +40,11 @@
     <!-- Explore Page -->
     <div class="page active" id="explorePage">
       <div class="header">
-        <h1>AI Career Navigator</h1>
-        <p>Enter a skill or interest to discover relevant career paths, certifications, learning resources, and more.</p>
+        <div class="header_inner">
+          <h1>AI Career Navigator</h1>
+          <p>Enter a skill or interest to discover relevant career paths, certifications, learning resources, and more.</p>
+        </div>
+        <button class="logout-btn" id="logoutBtn">Logout</button>
       </div>
       
       <div class="user-mode-selector">
@@ -142,7 +145,7 @@
         
         <div class="about-section">
           <h2>Contact Us</h2>
-          <p>For any questions or feedback, please contact us at support@aicareernavigator.com</p>
+          <p>For any questions or feedback, please contact us at karantomar207@gmail.com</p>
         </div>
       </div>
     </div>
@@ -151,7 +154,17 @@
       <p>Powered by AI Career Navigator - Finding your perfect career path.</p>
     </footer>
   </div>
-
-  <script src="script.js"></script>
+  <script>
+      document.getElementById('logoutBtn').addEventListener('click', function() {
+          window.location.href = '/login';
+      });
+      
+      // Add Font Awesome for icons
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css';
+      document.head.appendChild(link);
+  </script>
+  <script src="/static/script.js"></script>
 </body>
 </html>
