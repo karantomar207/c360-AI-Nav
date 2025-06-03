@@ -34,7 +34,7 @@ app.add_middleware(
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-app.mount("/static", StaticFiles(directory="frontend/static"), name="static")
+app.mount("/static", StaticFiles(directory="frontend"), name="static")
 
 @app.get("/signup", response_class=HTMLResponse)
 async def signup_page():
