@@ -153,7 +153,7 @@
         </form>
         
         <div class="auth-footer">
-            Don't have an account? <a href="signup.html">Sign up</a>
+            Don't have an account? <a href="/signup">Sign up</a>
         </div>
     </div>
 
@@ -198,7 +198,7 @@
                     document.getElementById('successMessage').textContent = 'Login successful! Redirecting to dashboard...';
                     document.getElementById('loginForm').reset();
                     setTimeout(() => {
-                        window.location.href = 'seperate_data.html';
+                        window.location.href = '/ai_navigator';
                     }, 1000);
                 } else {
                     document.getElementById('errorMessage').textContent = data.detail || 'Invalid credentials';

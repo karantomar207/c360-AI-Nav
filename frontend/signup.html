@@ -159,7 +159,7 @@
         </form>
         
         <div class="auth-footer">
-            Already have an account? <a href="login.html">Log in</a>
+            Already have an account? <a href="/login">Log in</a>
         </div>
     </div>
 
@@ -215,7 +215,7 @@
                     document.getElementById('successMessage').textContent = 'Signup successful! Redirecting to AI Naviagator...';
                     document.getElementById('signupForm').reset();
                     setTimeout(() => {
-                        window.location.href = 'seperate_data.html';
+                        window.location.href = '/search';
                     }, 2000);
                 } else {
                     document.getElementById('errorMessage').textContent = data.detail || 'An error occurred during signup';

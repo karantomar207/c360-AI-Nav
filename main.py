@@ -4,14 +4,18 @@ from fastapi.middleware.cors import CORSMiddleware
 from typing import Literal
 import logging
 
-# Import functions from modules
 from signup import UserSignup, UserLogin, init_database, create_user, authenticate_user
 from llm_query import search_logic, get_datasets_info, health_check_logic, root_info
-from external_jobs import extract_skills_from_live_jobs
 from fastapi import FastAPI, Query, HTTPException
 from typing import Literal
 import logging, uvicorn
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse, HTMLResponse, Response
+from fastapi.staticfiles import StaticFiles
+from fastapi import Path
+import webbrowser
+import threading, os
 
 
 # Initialize FastAPI app
@@ -30,6 +34,23 @@ app.add_middleware(
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+app.mount("/static", StaticFiles(directory="frontend/static"), name="static")
+
+@app.get("/signup", response_class=HTMLResponse)
+async def signup_page():
+    return FileResponse(os.path.join("frontend", "signup.html"))
+
+@app.get("/login", response_class=HTMLResponse)
+async def login_page():
+    return FileResponse(os.path.join("frontend", "login.html"))
+
+@app.get("/ai_navigator", response_class=HTMLResponse)
+async def dashboard_page():
+    return FileResponse(os.path.join("frontend", "seperate_data.html"))
+
+
+def open_browser():
+    webbrowser.open("http://www.karan.com:8000/signup")
 
 # ============ AUTH ROUTES ============
 @app.post("/signup")
@@ -65,5 +86,5 @@ def health_check():
     return health_check_logic()
 
 if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    threading.Timer(1.5, open_browser).start()
+    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
