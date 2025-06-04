@@ -2,9 +2,6 @@ aiobotocore
 aiohappyeyeballs
 aiohttp
 boto3
-dotenv
-faiss-cpu==1.8.0.post1
-faiss-gpu==1.7.2
 fastapi
 filelock
 fsspec
@@ -12,10 +9,8 @@ groq
 httpx
 huggingface-hub
 jinja2
-jiter
 joblib
 mysql-connector-python
-mysqlclient
 networkx
 numpy==1.24.4
 openai
@@ -43,3 +38,4 @@ tqdm
 transformers
 triton
 uvicorn
+faiss-cpu==1.8.0.post1
