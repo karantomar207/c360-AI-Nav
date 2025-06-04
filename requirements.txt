@@ -3,8 +3,8 @@ aiohappyeyeballs
 aiohttp
 boto3
 dotenv
-faiss-cpu
-faiss-gpu
+faiss-cpu==1.8.0.post1
+faiss-gpu==1.7.2
 fastapi
 filelock
 fsspec
@@ -17,7 +17,7 @@ joblib
 mysql-connector-python
 mysqlclient
 networkx
-numpy
+numpy==1.24.4
 openai
 pandas
 passlib
