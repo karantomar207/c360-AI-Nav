@@ -6,10 +6,10 @@
   <title>AI Career Navigator</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <link rel="stylesheet" href="/static/styles.css">
+  <link rel="stylesheet" href="/static/styles.css" />
 </head>
 <body>
-  <div class="sidebar">
+  <div class="sidebar glass">
     <div class="sidebar-header">
       <h2>Career Navigator</h2>
       <p>AI-Powered Career Guidance</p>
@@ -41,13 +41,13 @@
     <div class="page active" id="explorePage">
       <div class="header">
         <div class="header_inner">
-          <h1>AI Career Navigator</h1>
-          <p>Enter a skill or interest to discover relevant career paths, certifications, learning resources, and more.</p>
+          <h1 class="fadeInUp">AI Career Navigator</h1>
+          <p class="fadeInUp" style="animation-delay: 0.2s;">Enter a skill or interest to discover relevant career paths, certifications, learning resources, and more.</p>
         </div>
         <button class="logout-btn" id="logoutBtn">Logout</button>
       </div>
       
-      <div class="user-mode-selector">
+      <div class="user-mode-selector glass">
         <h2>I am a:</h2>
         <div class="mode-options">
           <div class="mode-option active" data-mode="student">
@@ -63,7 +63,7 @@
         </div>
       </div>
       
-      <div class="search-container">
+      <div class="search-container glass">
         <h2>Find Your Career Path</h2>
         <div class="search-box">
           <input type="text" id="userInput" placeholder="e.g., Python, Marketing, Data Analysis" />
@@ -95,7 +95,7 @@
           <span class="mode-indicator" id="modeIndicator">Student Mode</span>
         </div>
         
-        <div class="results-container" id="resultsContainer">
+        <div class="results-container" id="resultsContainer" class="glass">
           <!-- Results will be displayed here -->
         </div>
       </div>
@@ -114,7 +114,7 @@
         <p>View and manage your recent searches.</p>
       </div>
       
-      <div class="history-container">
+      <div class="history-container glass">
         <ul class="history-list" id="searchHistory">
           <!-- Search history will be displayed here -->
         </ul>
@@ -132,7 +132,7 @@
         <p>Your AI-powered guide to career exploration and development.</p>
       </div>
       
-      <div class="about-content">
+      <div class="about-content glass">
         <div class="about-section">
           <h2>Our Mission</h2>
           <p>AI Career Navigator is designed to help students and professionals discover relevant career paths, certifications, and resources based on their skills and interests. We use machine learning algorithms to provide personalized recommendations tailored to your experience level.</p>
@@ -154,16 +154,11 @@
       <p>Powered by AI Career Navigator - Finding your perfect career path.</p>
     </footer>
   </div>
+  
   <script>
-      document.getElementById('logoutBtn').addEventListener('click', function() {
-          window.location.href = '/login';
-      });
-      
-      // Add Font Awesome for icons
-      const link = document.createElement('link');
-      link.rel = 'stylesheet';
-      link.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css';
-      document.head.appendChild(link);
+    document.getElementById('logoutBtn').addEventListener('click', function() {
+      window.location.href = '/login';
+    });
   </script>
   <script src="/static/script.js"></script>
 </body>
