@@ -353,7 +353,7 @@ Your task is to enhance multiple course entries at once, filling empty or missin
 
 Guidelines:
 - Keep existing good content unchanged
-- Make descriptions concise but informative (max 150 words each)
+- Make descriptions concise but informative (max 100 words each)
 - Ensure all fields are meaningful and relevant
 - Don't repeat content across different courses
 - Be specific and actionable""",
@@ -382,7 +382,7 @@ Your task is to enhance multiple job entries at once, filling empty or missing f
 
 Guidelines:
 - Keep existing good content unchanged
-- Make descriptions comprehensive but concise (max 150 words each)
+- Make descriptions comprehensive but concise (max 100 words each)
 - Ensure all fields are meaningful and job-relevant
 - Don't repeat content across different jobs
 - Be specific about requirements and benefits""",
@@ -412,7 +412,7 @@ Your task is to enhance multiple certificate entries at once, filling empty or m
 
 Guidelines:
 - Keep existing good content unchanged
-- Make descriptions clear and value-focused (max 150 words each)
+- Make descriptions clear and value-focused (min 100 words each)
 - Ensure all fields are meaningful and certification-relevant
 - Don't repeat content across different certificates
 - Be specific about career benefits""",
@@ -441,7 +441,7 @@ Your task is to enhance multiple ebook entries at once, filling empty or missing
 
 Guidelines:
 - Keep existing good content unchanged
-- Make descriptions engaging and informative (max 150 words each)
+- Make descriptions engaging and informative (max 100 words each)
 - Ensure all fields are meaningful and book-relevant
 - Don't repeat content across different ebooks
 - Be specific about content and benefits""",
@@ -472,7 +472,7 @@ async def enhance_dataset_batch(dataset_name: str, items: List[Dict], query: str
     """Enhance a batch of items from a single dataset with one LLM call"""
     if not groq_client or not items:
         return items
-
+    print("///////////////////////////////////////////////////////////////////////////////////////////////////")
     try:
         # Get prompt template for this dataset
         template = get_dataset_prompt_template(dataset_name)
@@ -546,7 +546,7 @@ async def enhance_content_with_llm(query: str, raw_results: List[Dict], mode: st
 Instructions:
 1. Fill empty or missing fields with relevant, accurate information
 2. Keep existing content unchanged if it's already good
-3. Make descriptions concise but informative (max 150 words each)
+3. Make descriptions concise but informative (min 150 words each)
 4. Ensure all fields are meaningful and relevant to the query
 5. Don't repeat the same content across different items
 6. Be specific and actionable

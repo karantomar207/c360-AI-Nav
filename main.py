@@ -77,7 +77,7 @@ async def search(
     prompt: str = Query(..., description="Search prompt", min_length=1),
     mode: Literal["student", "professional"] = Query(..., description="Entry type"),
     enhance_content: bool = Query(True, description="Use LLM to enhance and fill missing content"),
-    max_results: int = Query(20, description="Maximum number of results", ge=5, le=50)
+    max_results: int = Query(30, description="Maximum number of results", ge=5, le=50)
 ):
     return await search_logic(prompt, mode, enhance_content, max_results)
 
