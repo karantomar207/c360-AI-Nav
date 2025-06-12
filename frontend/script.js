@@ -157,9 +157,8 @@ async function fetchData() {
         createObjectCard("Jobs", data.results.jobs, "fa-briefcase", item => `
           <ul>
             ${item.title ? `<li><strong>${item.title}</strong></li>` : ''}
-            ${item.company ? `<li>at ${item.company}</li>` : ''}
-            ${item.location ? `<li>(${item.location})</li>` : ''}
             ${item.description ? `<li>${item.description}</li>` : ''}
+            ${item.location ? `<li>(${item.location})</li>` : ''}
             ${item.salary_description ? `<li><strong>Salary:</strong> ${item.salary_description}</li>` : ''}
             ${item.requirements ? `<li><strong>Requirements:</strong> ${item.requirements}</li>` : ''}
           </ul><hr />
@@ -172,7 +171,7 @@ async function fetchData() {
             ${item.page_title ? `<li><strong>${item.page_title}</strong></li>` : ''}
             ${item.page_description ? `<li>${item.page_description}</li>` : ''}
             ${item.fee_detail ? `<li><strong>Fee:</strong> ${item.fee_detail}</li>` : ''}
-            ${item.course_highlight ? `<li><strong>Highlights:</strong> ${item.course_highlight}</li>` : ''}
+            ${item.learning_term_details ? `<li><strong>Learning Terms & Detail:</strong> ${item.learning_term_details}</li>` : ''}
             ${item.job_details ? `<li><strong>Career:</strong> ${item.job_details}</li>` : ''}
           </ul><hr />
         `);
@@ -183,9 +182,9 @@ async function fetchData() {
           <ul>
             ${item.course_name ? `<li><strong>${item.course_name}</strong></li>` : ''}
             ${item.page_description ? `<li>${item.page_description}</li>` : ''}
-            ${item.fee_detail ? `<li><strong>Fee:</strong> ${item.fee_detail}</li>` : ''}
+            ${item.fee_detail ? `<li><strong>Fee Details:</strong> ${item.fee_detail}</li>` : ''}
             ${item.learning_term_details ? `<li><strong>Topics:</strong> ${item.learning_term_details}</li>` : ''}
-            ${item.job_details ? `<li><strong>Career:</strong> ${item.job_details}</li>` : ''}
+            ${item.course_highlight ? `<li><strong>Course Highlights:</strong> ${item.course_highlight}</li>` : ''}
           </ul><hr />
         `);
       }
@@ -197,7 +196,7 @@ async function fetchData() {
             ${item.author ? `<li>by ${item.author}</li>` : ''}
             ${item.description ? `<li>${item.description}</li>` : ''}
             ${item.topics ? `<li><strong>Topics:</strong> ${item.topics}</li>` : ''}
-            ${item.pdf_upload ? `<li><a href="${item.pdf_upload}" target="_blank">View PDF</a></li>` : ''}
+            ${item.pdf_upload ? `<li><a href="https://cache.careers360.mobi/media/${item.pdf_upload}" target="blank" >View PDF</a></li>` : ''}
           </ul><hr />
         `);
       }
@@ -230,4 +229,30 @@ function createObjectCard(title, items, iconClass, renderItem) {
 
   card.innerHTML = cardContent;
   resultsContainer.appendChild(card);
+}
+
+function createObjectCard(title, items, iconClass, renderItem) {
+  const resultsContainer = document.getElementById("resultsContainer");
+  const card = document.createElement("div");
+  card.className = "result-card";
+
+  let cardContent = `<h3><i class="fas ${iconClass}"></i> ${title}</h3>`;
+
+  if (items && items.length > 0) {
+    items.forEach(item => {
+      cardContent += renderItem(item);
+    });
+  } else {
+    cardContent += `<p class="empty">No ${title.toLowerCase()} found for this query.</p>`;
+  }
+
+  card.innerHTML = cardContent;
+  resultsContainer.appendChild(card);
+
+  // Animate list items line-by-line
+  const listItems = card.querySelectorAll('li');
+  listItems.forEach((li, index) => {
+    li.classList.add('fade-in-line');
+    li.style.animationDelay = `${index * 0.15}s`;
+  });
 }
