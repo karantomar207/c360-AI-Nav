@@ -17,6 +17,7 @@ from datetime import datetime
 import re
 from sklearn.metrics.pairwise import cosine_similarity
 import tiktoken
+from pydantic_model import *
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -523,7 +524,7 @@ async def enhance_dataset_batch(dataset_name: str, items: List[Dict], query: str
         return items
 
 async def enhance_content_with_llm(query: str, raw_results: List[Dict], mode: str):
-    """True single API call batch processing - all datasets in one request"""
+    """Enhanced version with robust JSON parsing and partial data recovery"""
     if not groq_client:
         return format_raw_results(raw_results)
 
@@ -540,7 +541,7 @@ async def enhance_content_with_llm(query: str, raw_results: List[Dict], mode: st
         for dataset_name in grouped_data:
             grouped_data[dataset_name] = grouped_data[dataset_name][:8]
 
-        # Create single comprehensive prompt for ALL datasets
+        # Your existing system prompt and user message code here...
         system_prompt = f"""You are a content enhancement specialist. Your task is to analyze and improve data across multiple datasets based on the search query: "{query}" for {mode} mode.
 
 Instructions:
@@ -551,18 +552,17 @@ Instructions:
 5. Don't repeat the same content across different items
 6. Be specific and actionable
 7. Maintain the exact same JSON structure for each dataset
+8. Ensure all required fields are present for each item
+
+IMPORTANT: Return ONLY valid JSON. No extra text, no markdown formatting, just pure JSON.
 
 Dataset-specific requirements:
-- courses: page_title, page_description, fee_detail, learning_term_details, course_highlight, job_details
-- jobs: title, description, company, location, salary, requirements, benefits
-- certificates: page_title, page_description, fee_detail, learning_term_details, course_highlight, job_details
-- ebooks: title, description, author, pages, format, topics, level
+- courses: course_name, page_title, page_description, fee_detail, learning_term_details, course_highlight (all 6 fields required)
+- jobs: title, description, requirements, benefits, salary (all 5 fields required)
+- certificates: page_title, page_description, fee_detail, learning_term_details, job_details (all 5 fields required)
+- ebooks: title, description, author, level, topics, pdf_upload (all 6 fields required)"""
 
-Return the enhanced data in the EXACT same structure as provided, grouped by dataset."""
-
-        # Prepare the comprehensive batch data
         batch_data = json.dumps(grouped_data, indent=2)
-
         user_message = f"""Query: "{query}"
 Mode: {mode}
 
@@ -570,10 +570,10 @@ Please enhance all the following data across multiple datasets:
 
 {batch_data}
 
-Return the enhanced data in the exact same JSON structure, grouped by dataset name. Ensure each item within each dataset is unique and relevant to the query."""
+Return the enhanced data in valid JSON format only, grouped by dataset name."""
 
-        # Make SINGLE API call for ALL datasets
-        logger.info("Making single API call for all datasets")
+        # Make API call
+        logger.info("Making API call with robust parsing")
         completion = groq_client.chat.completions.create(
             model="llama3-70b-8192",
             messages=[
@@ -581,64 +581,43 @@ Return the enhanced data in the exact same JSON structure, grouped by dataset na
                 {"role": "user", "content": user_message}
             ],
             temperature=0.3,
-            max_tokens=3000,  # Increased for all datasets
+            max_tokens=3000,
             top_p=1,
             stream=False
         )
 
-        # Parse the enhanced content
         enhanced_content = completion.choices[0].message.content.strip()
+        logger.info("Received LLM response, starting robust validation")
 
-        # Extract JSON object from the response
-        json_match = re.search(r'\{.*\}', enhanced_content, re.DOTALL)
-        if json_match:
-            try:
-                enhanced_all_data = json.loads(json_match.group())
+        # Use robust validation
+        validated_results = validate_enhanced_data_robust(enhanced_content)
+        
+        # Remove duplicates
+        validated_results = remove_duplicates_from_validated_data(validated_results)
+        
+        # Ensure all original datasets are included (fallback to original data if needed)
+        final_results = {}
+        for dataset_name in grouped_data:
+            if dataset_name in validated_results and validated_results[dataset_name]:
+                final_results[dataset_name] = validated_results[dataset_name]
+            else:
+                logger.info(f"Using original data for {dataset_name} (validation failed or empty)")
+                final_results[dataset_name] = grouped_data[dataset_name]
+        
+        # Add any additional validated datasets
+        for dataset_name in validated_results:
+            if dataset_name not in final_results:
+                final_results[dataset_name] = validated_results[dataset_name]
 
-                # Validate that we got the expected structure
-                if isinstance(enhanced_all_data, dict):
-                    enhanced_results = {}
-
-                    # Process each dataset from the single response
-                    for dataset_name, items in enhanced_all_data.items():
-                        if dataset_name in grouped_data and isinstance(items, list):
-                            # Remove duplicates and ensure uniqueness
-                            unique_items = []
-                            seen_titles = set()
-
-                            for item in items:
-                                title = item.get('title', item.get('page_title', ''))
-                                if title and title not in seen_titles:
-                                    seen_titles.add(title)
-                                    unique_items.append(item)
-
-                            enhanced_results[dataset_name] = unique_items
-                        else:
-                            # Fallback to original data for this dataset
-                            enhanced_results[dataset_name] = grouped_data.get(dataset_name, [])
-
-                    # Ensure all original datasets are included
-                    for dataset_name in grouped_data:
-                        if dataset_name not in enhanced_results:
-                            enhanced_results[dataset_name] = grouped_data[dataset_name]
-
-                    logger.info("Successfully enhanced all datasets with single API call")
-                    return enhanced_results
-                else:
-                    logger.warning("LLM returned unexpected format, using original data")
-                    return format_raw_results(raw_results)
-
-            except json.JSONDecodeError as e:
-                logger.warning(f"Error parsing enhanced JSON: {e}")
-                return format_raw_results(raw_results)
-        else:
-            logger.warning("No JSON object found in LLM response")
-            return format_raw_results(raw_results)
+        total_items = sum(len(items) for items in final_results.values())
+        logger.info(f"Successfully processed {total_items} items across {len(final_results)} datasets")
+        
+        return final_results
 
     except Exception as e:
-        logger.error(f"Error in single-call content enhancement: {e}")
+        logger.error(f"Error in enhanced content processing: {e}")
         return format_raw_results(raw_results)
-
+    
 def format_raw_results(raw_results: List[Dict]):
     """Format raw results without LLM enhancement"""
     grouped_data = {}

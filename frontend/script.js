@@ -171,8 +171,7 @@ async function fetchData() {
             ${item.page_title ? `<li><strong>${item.page_title}</strong></li>` : ''}
             ${item.page_description ? `<li>${item.page_description}</li>` : ''}
             ${item.fee_detail ? `<li><strong>Fee:</strong> ${item.fee_detail}</li>` : ''}
-            ${item.fee_detail ? `<li><strong>Learning Terms & Detail:</strong> ${item.learning_term_details}</li>` : ''}
-            ${item.course_highlight ? `<li><strong>Highlights:</strong> ${item.course_highlight}</li>` : ''}
+            ${item.learning_term_details ? `<li><strong>Learning Terms & Detail:</strong> ${item.learning_term_details}</li>` : ''}
             ${item.job_details ? `<li><strong>Career:</strong> ${item.job_details}</li>` : ''}
           </ul><hr />
         `);
@@ -183,9 +182,9 @@ async function fetchData() {
           <ul>
             ${item.course_name ? `<li><strong>${item.course_name}</strong></li>` : ''}
             ${item.page_description ? `<li>${item.page_description}</li>` : ''}
-            ${item.fee_detail ? `<li><strong>Fee:</strong> ${item.fee_detail}</li>` : ''}
+            ${item.fee_detail ? `<li><strong>Fee Details:</strong> ${item.fee_detail}</li>` : ''}
             ${item.learning_term_details ? `<li><strong>Topics:</strong> ${item.learning_term_details}</li>` : ''}
-            ${item.job_details ? `<li><strong>Career:</strong> ${item.job_details}</li>` : ''}
+            ${item.course_highlight ? `<li><strong>Course Highlights:</strong> ${item.course_highlight}</li>` : ''}
           </ul><hr />
         `);
       }
