@@ -215,7 +215,7 @@
                     document.getElementById('successMessage').textContent = 'Signup successful! Redirecting to AI Naviagator...';
                     document.getElementById('signupForm').reset();
                     setTimeout(() => {
-                        window.location.href = '/search';
+                        window.location.href = '/ai_navigator';
                     }, 2000);
                 } else {
                     document.getElementById('errorMessage').textContent = data.detail || 'An error occurred during signup';
